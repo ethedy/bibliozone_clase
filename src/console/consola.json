@@ -1,0 +1,16 @@
+{
+  "connectionStrings": {
+    "curso": "Server=HAL-9000;Database=curso;Trusted_Connection=True;" 
+  },
+
+  "file": "C:\\pirulo.txt",
+
+  "saltarLineas": 1,
+
+  "separador": ";",
+
+  "formatosFecha": [
+    "yyyy",
+    "yyyy-MM-dd"
+  ]
+}

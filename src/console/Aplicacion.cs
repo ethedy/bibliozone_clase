@@ -1,4 +1,6 @@
-﻿using System;
+﻿#undef RUN_PRUEBAS
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -12,78 +14,74 @@ namespace console
 {
   public class Aplicacion
   {
-    private readonly ServiciosImportacion _serv;
+    private readonly ServiciosImportacion _imp;
 
-    public Aplicacion(ServiciosImportacion serv)
+    private readonly ServiciosExportacion _exp;
+
+    private readonly IConfiguration _config;
+
+    private readonly ILogger<Aplicacion> _logger;
+
+    public Aplicacion(ServiciosImportacion imp, ServiciosExportacion exp, IConfiguration config, ILogger<Aplicacion> logger)
     {
-      _serv = serv;
+      _imp = imp;
+      _exp = exp;
+      _config = config;
+      _logger = logger;
     }
 
     public void Run()
     {
       try
       {
-        //  TODO obtener archivo desde la configuracion
+        //  TODO_HECHO obtener archivo desde la configuracion
         //
-        IEnumerable<Libro> lista = _serv.ImportarCSV(@"D:\CURSOS\INCOMPANY\clase\datos\libros.csv");
+        string file = _config["file"];
 
-        //  Ejemplo #1
-        //  CASTING
-        //
-        Casting_a_List_v1("Ejemplo #1", lista);
+        if (file != null)
+        {
+          _logger.LogInformation("Iniciando el procesamiento del archivo {archivo}", file);
 
-        PrintLista(lista, l=>l.ID=="dummy", l=>$"{l.ID} {l.Titulo}");
+          switch (_config["tipo"])
+          {
+            //  --file=D:\CURSOS\INCOMPANY\clase\datos\libros.csv --tipo=libros
+            //
+            case "libros":
+              IEnumerable<Libro> lista = _imp.ImportarCSV(file);
 
-        //  Ejemplo #2
-        //  CASTING
-        //
-        Casting_a_List_v2("Ejemplo #2", lista);
+#if RUN_PRUEBAS
+          //  ejecutamos las pruebas sobre la lista importada (memoria)
+          //
+          Pruebas(lista);
+#endif
 
-        PrintLista(lista, l => l.ID == "dummy", l => $"{l.ID} {l.Titulo}");
+              _logger.LogInformation("Iniciando el proceso de exportacion");
 
-        //  Observar que si uso la version IEnumerable<T> no puedo acceder al resultado por subindices!!
-        //
-        //  for (int idx = 0; idx < lista.Count; idx++)
-        //  {
-        //    Console.WriteLine($"Titulo: {lista[idx].Titulo}");
-        //  }
+              //  pasamos la responsabilidad de la exportacion al componente adecuado...
+              //
+              _exp.ExportarListaDeLibros(lista);
+              break;
 
-        //  Ejemplo #3
-        //  DELEGADOS
-        //
-        Dos_Predicados_Con_Funciones_Locales("Ejemplo #3", lista);
+            //  --file=D:\CURSOS\INCOMPANY\clase\datos\autores.csv --tipo=autores
+            //
+            case "autores":
+              var autoresTemp = _imp.ImportarAutores(file);
 
-        //  Ejemplo #4
-        //  
-        //
-        Predicados_con_Funciones_Locales_y_Where("Ejemplo #4", lista);
+              foreach (var item in autoresTemp)
+              {
+                //  Console.WriteLine(item);
+                _logger.LogDebug("Se importo el siguiente par (idLibro, autor) ==> {tupla}", item);
+              }
 
-        //  Ejemplo #5
-        //
-        //
-        Expresiones_Lambda("Ejemplo #5", lista);
+              break;
 
-
-        //  Ejemplo #6
-        //
-        //
-        var tupla = RangoPrecios("Ejemplo #6", lista);
-
-        Console.WriteLine($"MIN = {tupla.min} MAX = {tupla.max}");
-
-
-        //  Ejemplo #7
-        //
-        //
-        Proyeccion_con_Filtro("Ejemplo #7",  lista);
-
-        //PrintLista(lista, l => l.ID == "dummy", l => $"{l.ID} {l.Titulo} {l.Precio}");
-
+            default:
+              throw new ApplicationException("Debe asociarse con un tipo de origen");
+          }
+        }
       }
       catch (ApplicationException ex) when (ex.Data.Contains("archivo"))
       {
-        //  _serv.ImportarCSV("");
-
         Console.WriteLine($"Se produjo una excepcion {ex.Message} Archivo: {ex.Data["archivo"]}");
       }
       catch (NullReferenceException ex)
@@ -99,6 +97,61 @@ namespace console
         Console.WriteLine();
         Console.WriteLine("[finally] ==> programa terminado!!");
       }
+    }
+
+    private void Pruebas(IEnumerable<Libro> lista)
+    {
+      //  Ejemplo #1
+      //  CASTING
+      //
+      Casting_a_List_v1("Ejemplo #1", lista);
+
+      PrintLista(lista, l => l.ID == "dummy", l => $"{l.ID} {l.Titulo}");
+
+      //  Ejemplo #2
+      //  CASTING
+      //
+      Casting_a_List_v2("Ejemplo #2", lista);
+
+      PrintLista(lista, l => l.ID == "dummy", l => $"{l.ID} {l.Titulo}");
+
+      //  Observar que si uso la version IEnumerable<T> no puedo acceder al resultado por subindices!!
+      //
+      //  for (int idx = 0; idx < lista.Count; idx++)
+      //  {
+      //    Console.WriteLine($"Titulo: {lista[idx].Titulo}");
+      //  }
+
+      //  Ejemplo #3
+      //  DELEGADOS
+      //
+      Dos_Predicados_Con_Funciones_Locales("Ejemplo #3", lista);
+
+      //  Ejemplo #4
+      //  
+      //
+      Predicados_con_Funciones_Locales_y_Where("Ejemplo #4", lista);
+
+      //  Ejemplo #5
+      //
+      //
+      Expresiones_Lambda("Ejemplo #5", lista);
+
+
+      //  Ejemplo #6
+      //
+      //
+      var tupla = RangoPrecios("Ejemplo #6", lista);
+
+      Console.WriteLine($"MIN = {tupla.min} MAX = {tupla.max}");
+
+
+      //  Ejemplo #7
+      //
+      //
+      Proyeccion_con_Filtro("Ejemplo #7", lista);
+
+      //PrintLista(lista, l => l.ID == "dummy", l => $"{l.ID} {l.Titulo} {l.Precio}");
     }
 
     //

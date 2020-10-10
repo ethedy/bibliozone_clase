@@ -4,10 +4,14 @@ using System.Text;
 
 namespace Entidades.Articulos
 {
-  public class Editorial
+  public class Autor
   {
-    public Guid ID { get; set; }
+    public int ID { get; set; }
 
     public string Nombre { get; set; }
+
+    public string Biografia { get; set; }
+
+    public ISet<LibroAutor> AutorLibros { get; set; }
   }
 }

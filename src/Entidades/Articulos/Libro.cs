@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection.Metadata;
 
 namespace Entidades.Articulos
@@ -42,6 +43,7 @@ namespace Entidades.Articulos
   public class Libro
   {
     //  TODO_HECHO agregar las propiedades restantes para completar el modelo de dominio de Libro
+    public Guid ID_Real { get; set; }
 
     public string ID { get; set; }
 
@@ -77,7 +79,6 @@ namespace Entidades.Articulos
     public int? Comentarios { get; set; }
 
     public string Idioma { get; set; }
-
     //  
     //
     public string LinkCanonico { get; set; }
@@ -85,5 +86,7 @@ namespace Entidades.Articulos
     public string LinkImagen { get; set; }
 
     public string LinkInfo { get; set; }
+
+    public ISet<LibroAutor> LibroAutores { get; set; }
   }
 }

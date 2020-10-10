@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "console": {
+      "commandName": "Project",
+      "commandLineArgs": "--file=D:\\CURSOS\\INCOMPANY\\clase\\datos\\libros.csv --tipo=libros"
+    }
+  }
+}

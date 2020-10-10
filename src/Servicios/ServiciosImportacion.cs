@@ -5,6 +5,8 @@ using System.IO;
 using Entidades.Articulos;
 using System.Globalization;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 
 namespace Servicios
@@ -16,11 +18,17 @@ namespace Servicios
   {
     private string _fileName;
 
+    private readonly IConfiguration _config;
+
+    private readonly ILogger<ServiciosImportacion> _logger;
+
     /// <summary>
     /// Constructor del servicio de importacion por ahora a partir de un nombre de archivo
     /// </summary>
-    public ServiciosImportacion()
+    public ServiciosImportacion(IConfiguration config, ILogger<ServiciosImportacion> logger)
     {
+      _config = config;
+      _logger = logger;
     }
 
     /// <summary>
@@ -79,7 +87,9 @@ namespace Servicios
       List<Libro> resultado = new List<Libro>();
 #endif
 
-      int saltarLineas = 1;
+      int saltarLineas = _config.GetValue<int>("saltarLineas");
+      string separador = _config["separador"] ?? throw new ApplicationException("Por favor colocar un separador!!!");
+      string[] formatos = _config.GetSection("formatosFecha").Get<string[]>();
 
       //  Libro[] resultado = new Libro[100];
       //  int idx = 0;
@@ -101,7 +111,7 @@ namespace Servicios
 
         string linea = rdr.ReadLine();
         //  char[] separadores = new char[2]; separadores[0] = ';'; separadores[1] = '|';
-        string[] campos = linea?.Split(new []{';'} , StringSplitOptions.None);
+        string[] campos = linea?.Split(new[] {separador}, StringSplitOptions.None);
 
         if (campos?.Length == 19)
         {
@@ -129,13 +139,15 @@ namespace Servicios
           nuevo.Publicacion = null;
           if (!String.IsNullOrWhiteSpace(campos[5]))
           {
-            if (DateTime.TryParseExact(campos[5], new[] { "yyyy", "yyyy-MM-dd" }, null,
+            if (DateTime.TryParseExact(campos[5], formatos, null,
               DateTimeStyles.None, out DateTime fechaTemp))
             {
               nuevo.Publicacion = fechaTemp;
             }
             else
-              Console.WriteLine($"WARNING: formato incorrecto!! Recibido: {campos[5]}");   //  TODO agregar LOG
+              _logger.LogCritical("Formato de fecha incorrecto. Se recibe: {fecha}", campos[5]);
+
+            //  Console.WriteLine($"WARNING: formato incorrecto!! Recibido: {campos[5]}");   //  TODO agregar LOG
           }
 
           nuevo.Publico = campos[8].ToUpper() switch
@@ -237,6 +249,67 @@ namespace Servicios
 
 #endregion
     }
+
+    /// <summary>
+    /// Permite importar la lista de autores con sus libros asociados
+    /// Retorna una enumeracion de tuplas con el id del libro y el nombre del autor
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <returns></returns>
+    public IEnumerable<(string idLibro, string nombre)> ImportarAutores(string fileName)
+    {
+      if (!File.Exists(fileName))
+        throw new ApplicationException("El archivo no existe")
+        {
+          Data =
+          {
+            {"archivo", fileName}
+          }
+        };
+
+      using StreamReader rdr = new StreamReader(fileName);
+
+      List<(string id, string nombre)> resultado = new List<(string id, string nombre)>();
+
+      int saltarLineas = _config.GetValue<int>("saltarLineas");
+      string separador = _config["separador"] ?? ";";
+
+      //  Libro[] resultado = new Libro[100];
+      //  int idx = 0;
+
+      while (!rdr.EndOfStream)
+      {
+        if (saltarLineas != 0)
+        {
+          rdr.ReadLine();
+
+          saltarLineas--;
+
+          continue;
+        }
+
+        string linea = rdr.ReadLine();
+
+        string[] campos = linea?.Split(new[] { separador }, StringSplitOptions.None);
+
+        if (campos?.Length == 2)
+        {
+          (string id, string aut) nuevo = default;
+
+          nuevo.id = campos[0];
+          nuevo.aut = campos[1];
+
+          resultado.Add(nuevo);
+        }
+        else
+        {
+          Console.WriteLine($"LOG ERROR - {linea}"); //  TODO agregar LOG
+        }
+      }
+
+      return resultado;
+    }
+
   }
 }
 
