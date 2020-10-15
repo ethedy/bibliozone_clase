@@ -11,28 +11,30 @@ using Microsoft.Extensions.Logging;
 
 namespace Datos
 {
-  public class BZoneContext : DbContext
+  public class ExportContext : DbContext
   {
     private readonly IConfiguration _config;
 
-    private readonly ILogger<BZoneContext> _logger;
+    private readonly ILogger<ExportContext> _logger;
 
     private readonly ILoggerFactory _loggerFactory;
 
     //  public DbSet<Libro> Libros { get; set; }
 
+    public DbSet<Autor> Autores { get; set; }
+
 #if USE_ADDDBCONTEXT
 
-    public BZoneContext(DbContextOptions<BZoneContext> options, IConfiguration config, ILogger<BZoneContext> logger) : base(options)
+    public ExportContext(DbContextOptions<ExportContext> options, IConfiguration config, ILogger<ExportContext> logger) : base(options)
     {
-      //  TODO cambiar nombre del contexto para adecuarlo a la funcion
+      //  TODO_HECHO cambiar nombre del contexto para adecuarlo a la funcion
       //  TODO usar nombre del contexto para obtener la cadena de conexion
 
       _config = config;
       _logger = logger;
       //  _logger = this.GetService<ILogger<BZoneContext>>();
 
-      _logger.LogWarning("Creado contexto {contexto} desde AddDbContext<T>", nameof(BZoneContext));
+      _logger.LogWarning("Creado contexto {contexto} desde AddDbContext<T>", nameof(ExportContext));
     }
 
 #else
@@ -69,12 +71,33 @@ namespace Datos
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      _logger.LogWarning("Empezando la creacion del modelo para el contexto {contexto}", nameof(BZoneContext));
+      _logger.LogWarning("Empezando la creacion del modelo para el contexto {contexto}", nameof(ExportContext));
 
-      modelBuilder.ApplyConfiguration(new ConfigurarLibros());
+      modelBuilder.ApplyConfiguration(new ConfigurarLibros(_config));
       modelBuilder.ApplyConfiguration(new ConfigurarLibrosAutores());
+      modelBuilder.ApplyConfiguration(new ConfigurarAutores());
 
       base.OnModelCreating(modelBuilder);
+    }
+
+    public void Debug()
+    {
+      if (ChangeTracker.HasChanges())
+      {
+        Console.WriteLine("Status del Contexto");
+
+        foreach (var item in ChangeTracker.Entries())
+        {
+          Console.WriteLine($"{item.Entity.GetType()} {item.State}");
+          if (item.State == EntityState.Modified)
+          {
+            foreach (var prop in item.Properties)
+            {
+              Console.WriteLine($"==> {prop.Metadata.Name} -- {(prop.IsModified ? "Modificada":"No modificada")}");
+            }
+          }
+        }
+      }
     }
   }
 }

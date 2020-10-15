@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PromptSharp</name>
+    </assembly>
+    <members>
+        <member name="M:PromptSharp.Forms.Select`1.#ctor(System.String,System.Collections.Generic.IEnumerable{`0},System.Nullable{System.Int32},System.Object,System.Func{`0,System.String})">
+            <summary>
+            
+            </summary>
+            <param name="message"></param>
+            <param name="items"></param>
+            <param name="pageSize"></param>
+            <param name="defaultValue"></param>
+            <param name="valueSelector"></param>
+        </member>
+        <member name="T:PromptSharp.Internal.Selector`1">
+            <summary>
+            Esta clase permite virtualizar opciones de seleccion de elementos de tipo T
+            No hay visualizacion ni interaccion!
+            Los metodos van marcando los items que se seleccionan mediante algun otro mecanismo
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:PromptSharp.Internal.Selector`1.#ctor(System.Collections.Generic.IEnumerable{`0},System.Nullable{System.Int32},System.Object,System.Func{`0,System.String})">
+            <summary>
+            
+            </summary>
+            <param name="items">Son los elementos de tipo T que necesitamos seleccionar</param>
+            <param name="pageSize"></param>
+            <param name="defaultValue"></param>
+            <param name="valueSelector">Delegado que me permite obtener un valor representativo de T para poder filtrarlo
+            mediante <see cref="P:PromptSharp.Internal.Selector`1.FilterTerm"/> y mostrarlo en pantalla
+            </param>
+        </member>
+        <member name="M:PromptSharp.Prompt.Menu(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Muestra un menu de opciones a las cuales se les incorpora un indice numerico para identificarlas
+            Retorna el indice elegido por el usuario
+            </summary>
+            <remarks>
+            No deberia filtrar el menu...porque si tengo armada una estructura con opciones verticales haria un chiquero...
+            Igual no permite opciones a la derecha (solo cambio de pagina)
+            </remarks>
+            <param name="header"></param>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PromptSharp.Prompt.Select``1(System.String,System.Nullable{System.Int32},System.Nullable{``0},System.Func{``0,System.String})">
+            <summary>
+            Permite seleccionar un valor a partir de un enum determindado
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="message"></param>
+            <param name="pageSize"></param>
+            <param name="defaultValue"></param>
+            <param name="valueSelector"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PromptSharp.Prompt.Select``1(System.String,System.Collections.Generic.IEnumerable{``0},System.Nullable{System.Int32},System.Object,System.Func{``0,System.String})">
+            <summary>
+            Retorna el elemento que se selecciona entre una enumeracion de los mismos
+            Seria interesante mostrar que hay mas paginas de items...
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="message"></param>
+            <param name="items"></param>
+            <param name="pageSize"></param>
+            <param name="defaultValue"></param>
+            <param name="valueSelector"></param>
+            <returns></returns>
+        </member>
+        <member name="T:PromptSharp.Recursos.Mensajes">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:PromptSharp.Recursos.Mensajes.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:PromptSharp.Recursos.Mensajes.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:PromptSharp.Recursos.Mensajes.noValidOptionsLower">
+            <summary>
+              Looks up a localized string similar to n;no.
+            </summary>
+        </member>
+        <member name="P:PromptSharp.Recursos.Mensajes.valueInvalid">
+            <summary>
+              Looks up a localized string similar to Valor incorrecto para la entrada.
+            </summary>
+        </member>
+        <member name="P:PromptSharp.Recursos.Mensajes.valueRequired">
+            <summary>
+              Looks up a localized string similar to Se requiere un valor para la entrada.
+            </summary>
+        </member>
+        <member name="P:PromptSharp.Recursos.Mensajes.yesValidOptionsLower">
+            <summary>
+              Looks up a localized string similar to y;s;yes;si.
+            </summary>
+        </member>
+        <member name="M:PromptSharp.Utiles.PromptExtensions.In(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Permite chequear si una cadena es una de las especificadas en la coleccion enumerable
+            </summary>
+            <param name="src"></param>
+            <param name="testList"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

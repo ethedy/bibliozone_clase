@@ -38,7 +38,7 @@ namespace console
           serv.AddScoped<ServiciosExportacion>();
 
 #if USE_ADDDBCONTEXT
-          serv.AddDbContext<BZoneContext>(build =>
+          serv.AddDbContext<ExportContext>(build =>
           {
             build.UseSqlServer(ctx.Configuration.GetConnectionString("curso"));
             build.EnableDetailedErrors();
@@ -53,7 +53,7 @@ namespace console
             logBuilder.ClearProviders();
 
             logBuilder.AddSerilog(new LoggerConfiguration()
-              .MinimumLevel.Verbose()
+              .MinimumLevel.Information()
               .WriteTo.Console()
               .WriteTo.File("console.log")
               .CreateLogger());

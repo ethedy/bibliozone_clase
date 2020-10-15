@@ -1,6 +1,6 @@
 {
   "connectionStrings": {
-    "curso": "Server=HAL-9000;Database=curso;Trusted_Connection=True;" 
+    "curso": "Server=HAL-9000;Database=curso;Trusted_Connection=True;"
   },
 
   "file": "C:\\pirulo.txt",
@@ -12,5 +12,7 @@
   "formatosFecha": [
     "yyyy",
     "yyyy-MM-dd"
-  ]
+  ],
+
+  "usarSqlDefaults": false
 }

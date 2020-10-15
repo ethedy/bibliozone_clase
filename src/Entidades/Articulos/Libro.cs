@@ -88,5 +88,10 @@ namespace Entidades.Articulos
     public string LinkInfo { get; set; }
 
     public ISet<LibroAutor> LibroAutores { get; set; }
+
+    public Libro()
+    {
+      LibroAutores = new HashSet<LibroAutor>();
+    }
   }
 }

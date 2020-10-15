@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Figgle" Version="0.4.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.8" />
     <PackageReference Include="Serilog" Version="2.10.0" />
@@ -16,7 +17,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Entidades\Entidades.csproj" />
+    <ProjectReference Include="..\PromptSharp\PromptSharp.csproj" />
     <ProjectReference Include="..\Servicios\Servicios.csproj" />
+    <ProjectReference Include="..\Utiles\Utiles.csproj" />
   </ItemGroup>
 
   <ItemGroup>

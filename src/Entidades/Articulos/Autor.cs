@@ -13,5 +13,10 @@ namespace Entidades.Articulos
     public string Biografia { get; set; }
 
     public ISet<LibroAutor> AutorLibros { get; set; }
+
+    public Autor()
+    {
+      AutorLibros = new HashSet<LibroAutor>();
+    }
   }
 }

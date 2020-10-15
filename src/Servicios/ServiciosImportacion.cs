@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Utiles;
 
 
 namespace Servicios
@@ -93,6 +94,7 @@ namespace Servicios
 
       //  Libro[] resultado = new Libro[100];
       //  int idx = 0;
+      bool libroValido;
 
       while (!rdr.EndOfStream)
       {
@@ -116,20 +118,23 @@ namespace Servicios
         if (campos?.Length == 19)
         {
           Libro nuevo = new Libro();
+          libroValido = true;
 
-          nuevo.ID = campos[0];
-          nuevo.ISBN13 = campos[1];
-          nuevo.ISBN10 = campos[2];
-          nuevo.Titulo = campos[3];
-          nuevo.Subtitulo = campos[4];
-          nuevo.Editorial = campos[7];
-          nuevo.Descripcion = campos[9];
-          nuevo.Categoria = campos[10];
-          nuevo.Moneda = campos[12];
-          nuevo.Idioma = campos[15];
-          nuevo.LinkCanonico = campos[16];
-          nuevo.LinkImagen = campos[17];
-          nuevo.LinkInfo = campos[18];
+          //  minimamente pedimos que el ID y el titulo no esten vacios!
+          //
+          nuevo.ID = campos[0].ActionIfEmpty(() => libroValido = false);
+          nuevo.ISBN13 = campos[1].NullIfEmpty();
+          nuevo.ISBN10 = campos[2].NullIfEmpty();
+          nuevo.Titulo = campos[3].ActionIfEmpty(() => libroValido = false);
+          nuevo.Subtitulo = campos[4].NullIfEmpty();
+          nuevo.Editorial = campos[7].NullIfEmpty();
+          nuevo.Descripcion = campos[9].NullIfEmpty();
+          nuevo.Categoria = campos[10].NullIfEmpty();
+          nuevo.Moneda = campos[12].NullIfEmpty();
+          nuevo.Idioma = campos[15].NullIfEmpty();
+          nuevo.LinkCanonico = campos[16].NullIfEmpty();
+          nuevo.LinkImagen = campos[17].NullIfEmpty();
+          nuevo.LinkInfo = campos[18].NullIfEmpty();
 
           //  TODO_HECHO procesar resto de los campos de texto
 
@@ -176,28 +181,36 @@ namespace Servicios
                 $"LOG ERROR: Error no se puede convertir {campos[11]} en decimal. Propiedad {nameof(nuevo.Precio)}");
           }
 
+          nuevo.Comentarios = ParseEntero(campos[14], nameof(nuevo.Comentarios));
+
           //  TODO_HECHO procesar campo rating_avg
+          //  Solamente proceso el rating si los comentarios son diferentes de cero...de otra manera dejo null
           //
           nuevo.RatingPromedio = null;
-          if (!string.IsNullOrWhiteSpace(campos[13]))
+          if (nuevo.Comentarios != 0)
           {
-            if (Single.TryParse(campos[13], NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat,
-              out float rating))
+            if (!string.IsNullOrWhiteSpace(campos[13]))
             {
-              nuevo.RatingPromedio = rating;
+              if (Single.TryParse(campos[13], NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat,
+                out float rating))
+              {
+                nuevo.RatingPromedio = rating;
+              }
+              else
+                Console.WriteLine(
+                  $"LOG ERROR: Error no se puede convertir {campos[13]} en float. Propiedad {nameof(nuevo.RatingPromedio)}");
             }
-            else
-              Console.WriteLine(
-                $"LOG ERROR: Error no se puede convertir {campos[13]} en float. Propiedad {nameof(nuevo.RatingPromedio)}");
           }
-          
-          nuevo.Comentarios = ParseEntero(campos[14], nameof(nuevo.Comentarios));
           //
           //  nuevo.Precio = null;
+          //  nuevo.Publicacion = null;
+
 #if RETORNA_ARRAY
-          resultado[idx++] = nuevo;
+          if (libroValido)
+            resultado[idx++] = nuevo;
 #else
-          resultado.Add(nuevo);
+          if (libroValido)
+            resultado.Add(nuevo);
 #endif
           //  resultado[idx++] = nuevo;
         }

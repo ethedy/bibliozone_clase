@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Datos\Datos.csproj" />
     <ProjectReference Include="..\Entidades\Entidades.csproj" />
+    <ProjectReference Include="..\Utiles\Utiles.csproj" />
   </ItemGroup>
 
 </Project>

@@ -6,9 +6,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Entidades.Articulos;
+using Figgle;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using PromptSharp;
 using Servicios;
+using Utiles;
 
 namespace console
 {
@@ -32,52 +35,162 @@ namespace console
 
     public void Run()
     {
+      Console.Clear();
+      Header("biblioZ-cli", "Interface de linea de comando para BiblioZone");
+
       try
       {
+        int opcion = Prompt.Menu("Seleccionar una de las acciones que queres realizar", new[]
+        {
+          "Importar Libros desde --file y ejecutar las pruebas en memoria",
+          "Importar Libros desde --file y guardar en la DB",
+          "*** Importar Autores desde --file [falta implementar guardar en la DB]",
+          "Consultas varias desde el contexto",
+          "Pruebas ingresando Libros"
+        });
+
         //  TODO_HECHO obtener archivo desde la configuracion
+        //
+        //  --file=D:\CURSOS\INCOMPANY\clase\datos\libros.csv --tipo=libros
+        //
+        //  --file=D:\CURSOS\INCOMPANY\clase\datos\autores.csv --tipo=autores
+        //
+        //  NOTA: cuando ponemos el menu, no tiene sentido usar la opcion --tipo
         //
         string file = _config["file"];
 
-        if (file != null)
+        if (opcion.In(0, 2, 1) && file == null)
+          throw new ApplicationException("La opcion seleccionada necesita que se pase un archivo en --file");
+
+        switch (opcion)
         {
-          _logger.LogInformation("Iniciando el procesamiento del archivo {archivo}", file);
-
-          switch (_config["tipo"])
-          {
-            //  --file=D:\CURSOS\INCOMPANY\clase\datos\libros.csv --tipo=libros
-            //
-            case "libros":
-              IEnumerable<Libro> lista = _imp.ImportarCSV(file);
-
-#if RUN_PRUEBAS
-          //  ejecutamos las pruebas sobre la lista importada (memoria)
-          //
-          Pruebas(lista);
-#endif
-
-              _logger.LogInformation("Iniciando el proceso de exportacion");
-
-              //  pasamos la responsabilidad de la exportacion al componente adecuado...
-              //
-              _exp.ExportarListaDeLibros(lista);
-              break;
-
-            //  --file=D:\CURSOS\INCOMPANY\clase\datos\autores.csv --tipo=autores
-            //
-            case "autores":
-              var autoresTemp = _imp.ImportarAutores(file);
-
-              foreach (var item in autoresTemp)
+          case 0:
+            {
+              if (Prompt.Confirm($"Es el archivo correcto? ==> {file}"))
               {
-                //  Console.WriteLine(item);
-                _logger.LogDebug("Se importo el siguiente par (idLibro, autor) ==> {tupla}", item);
+                _logger.LogInformation("Iniciando el procesamiento del archivo de Libros {archivo}", file);
+
+                IEnumerable<Libro> lista = _imp.ImportarCSV(file);
+
+                _logger.LogInformation("Ejecutando pruebas en memoria...");
+
+                //  ejecutamos las pruebas sobre la lista importada (memoria)
+                //
+                Pruebas(lista);
+              }
+            }
+            break;
+
+          case 1:
+            {
+              if (Prompt.Confirm($"Es el archivo correcto? ==> {file}"))
+              {
+                _logger.LogInformation("Iniciando el procesamiento del archivo de Libros {archivo}", file);
+
+                IEnumerable<Libro> lista = _imp.ImportarCSV(file);
+
+                _logger.LogInformation("Iniciando el proceso de exportacion");
+
+                //  eliminamos los datos previos??
+                if (Prompt.Confirm("Eliminamos datos previos?", true,
+                  "WARNING Esta operacion eliminara todos los datos de las 3 tablas de Articulos!!"))
+                {
+                  _exp.ClearDatabase();
+                }
+
+                //  pasamos la responsabilidad de la exportacion al componente adecuado...
+                //
+                _exp.ExportarListaDeLibros(lista);
+              }
+            }
+            break;
+
+          case 2:
+            {
+              if (Prompt.Confirm($"Es el archivo correcto? ==> {file}"))
+              {
+                _logger.LogInformation("Iniciando el procesamiento del archivo de Autores {archivo}", file);
+
+                var autoresTemp = _imp.ImportarAutores(file);
+
+                Console.WriteLine("Lista de autores importados...");
+
+                foreach (var item in autoresTemp)
+                {
+                  Console.WriteLine($"Se importo el siguiente par (idLibro, autor) ==> {item}");
+
+                  _logger.LogDebug("Se importo el siguiente par (idLibro, autor) ==> {tupla}", item);
+                }
+              }
+            }
+            break;
+
+          case 3:
+            {
+              string editorial = Prompt.Input<string>("Ingresar el nombre de una editorial");
+
+              Console.WriteLine($"Titulos para la Editorial {editorial}:\n");
+
+              foreach (string titulo in _exp.ObtenerTitulosDeEditorial(editorial))
+              {
+                Console.WriteLine(titulo);
+              }
+            }
+            break;
+
+          case 4:
+            {
+              Console.WriteLine($"Pruebas de ingresos varias para libros y autores:\n");
+              string titulo = Prompt.Input<string>("Ingresar titulo o parte del titulo");
+
+              var libroResultado = _exp.GetLibros(titulo).FirstOrDefault();
+
+              if (libroResultado == null)
+              {
+                //  crear nuevo libro...
+                libroResultado = new Libro()
+                {
+                  ID = "1234",
+                  Titulo = titulo,
+                  Publicacion = null
+                };
+              }
+              else
+              {
+                Console.WriteLine($"Autores del libro: {libroResultado.Titulo}");
+
+                foreach (var au in libroResultado.LibroAutores)
+                  Console.WriteLine($"ID={au.ID_Autor} ; Nombre={au.Autor.Nombre}");
               }
 
-              break;
+              string autor = Prompt.Input<string>("Ingresar nombre del autor (exacto)");
+              var autorResultado = _exp.GetAutor(autor);
 
-            default:
-              throw new ApplicationException("Debe asociarse con un tipo de origen");
-          }
+              if (autorResultado == null)
+              {
+                autorResultado = new Autor()
+                {
+                  Nombre = autor
+                };
+              }
+              else
+              {
+                Console.WriteLine($"Libros escritos por {autor}");
+
+                foreach (var li in autorResultado.AutorLibros)
+                  Console.WriteLine($"{li.Libro.Titulo}");
+              }
+
+              //  PARA MEDITAR -- De que manera podemos evitar el UPDATE del Libro que no esta modificado??
+              //
+              libroResultado.LibroAutores.Add(new LibroAutor() { Libro = libroResultado, Autor = autorResultado });
+
+              _exp.AgregarLibro(libroResultado);
+              //  _exp.AgregarLibroAutor(new LibroAutor() { Libro = libroResultado, Autor = autorResultado });
+
+              Console.WriteLine($"GUID: {libroResultado.ID_Real} Fecha: {libroResultado.Publicacion}");
+            }
+            break;
         }
       }
       catch (ApplicationException ex) when (ex.Data.Contains("archivo"))
@@ -177,14 +290,14 @@ namespace console
       if (ienum is List<Libro> lista)
       {
         lista[0] = new Libro()
-          {ID = "dummy", Titulo = "La Biblia para Programadores Agnosticos", Paginas = 1200, Precio = 100.0M};
+        { ID = "dummy", Titulo = "La Biblia para Programadores Agnosticos", Paginas = 1200, Precio = 100.0M };
       }
 
       //  operador is y casting tradicional
       //
       if (ienum is List<Libro>)
       {
-        List<Libro> mismaLista = (List<Libro>) ienum;
+        List<Libro> mismaLista = (List<Libro>)ienum;
 
         mismaLista[20].ID = "dummy";
         mismaLista[20].Titulo = "Programacion Orientada a Objetos en la Edad Media";
@@ -209,10 +322,10 @@ namespace console
       //
       try
       {
-        List<Libro> lista = (List<Libro>) ienum;
+        List<Libro> lista = (List<Libro>)ienum;
 
         lista[0] = new Libro()
-          {ID = "dummy", Titulo = "La Biblia para Programadores Agnosticos", Paginas = 1200, Precio = 100.0M};
+        { ID = "dummy", Titulo = "La Biblia para Programadores Agnosticos", Paginas = 1200, Precio = 100.0M };
       }
       catch (InvalidCastException ex)
       {
@@ -353,7 +466,7 @@ namespace console
       if (noNulos.Count() != 0)
       {
         decimal min = noNulos
-          .Select(l => new {PrecioNoNull = l.Precio.Value})
+          .Select(l => new { PrecioNoNull = l.Precio.Value })
           .Min(x => x.PrecioNoNull);
 
         decimal max = noNulos.Max(l => l.Precio.Value);
@@ -376,7 +489,7 @@ namespace console
 
       var proyeccion = lista
         .Where(lib => lib.ID == "dummy")
-        .Select(lib => new {lib.ID, lib.Titulo, PrecioIVA = (lib.Precio ?? 0) * 1.21M, lib.Precio});
+        .Select(lib => new { lib.ID, lib.Titulo, PrecioIVA = (lib.Precio ?? 0) * 1.21M, lib.Precio });
 
       foreach (var s in proyeccion)
       {
@@ -388,7 +501,7 @@ namespace console
       }
     }
 
-    private void PrintLista(IEnumerable<Libro> lista,Func<Libro, bool> predicado, Func<Libro, string> toString)
+    private void PrintLista(IEnumerable<Libro> lista, Func<Libro, bool> predicado, Func<Libro, string> toString)
     {
       //Console.WriteLine("---------------------------------------------------------------------------------------");
 
@@ -396,6 +509,28 @@ namespace console
         Console.WriteLine(toString(item));
 
       Console.WriteLine();
+      Console.WriteLine();
+    }
+
+    private void Header(string header, string subtitulo = null)
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine(FiggleFonts.Standard.Render(header));
+      //Console.WriteLine(FiggleFonts.Roman.Render("Actualiza"));
+      if (subtitulo != null)
+      {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine(subtitulo);
+      }
+      Console.ForegroundColor = ConsoleColor.White;
+      Console.WriteLine();
+    }
+
+    private void Footer(string footer)
+    {
+      Console.ForegroundColor = ConsoleColor.DarkGreen;
+      Console.WriteLine(footer);
+      Console.ForegroundColor = ConsoleColor.White;
       Console.WriteLine();
     }
   }
