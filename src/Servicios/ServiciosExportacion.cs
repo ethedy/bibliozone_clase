@@ -76,6 +76,13 @@ namespace Servicios
         .ToList();
     }
 
+    public IEnumerable<Libro> ObtenerLibrosDeEditorial(string editorial)
+    {
+      return _ctx
+        .Set<Libro>()
+        .FromSqlInterpolated($"select * from Libros where Editorial={editorial}");
+    }
+
     public IEnumerable<Libro> GetLibros(string titulo)
     {
       return _ctx

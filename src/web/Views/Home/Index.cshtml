@@ -1,8 +1,35 @@
 ﻿@{
-    //ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section scripts_links
+{
+  <script src="lib/vue/vue.js"></script>
+}
+
+@section style_page
+{
+  <style>
+  </style>
+}
+
+
+@section script_page
+{
+
+  <script language="javascript" type="text/javascript">
+    $(document).ready(function () {
+      @if (ViewBag.ShowAlert)
+      {
+        <text>
+          window.alert("@ViewBag.Mensaje");
+        </text>
+      }
+    });
+  </script>
+
+}
+
+<div>
+  <a class="btn btn-primary" asp-controller="Home" asp-action="Libros" >Consulta x Editorial</a>
 </div>
+

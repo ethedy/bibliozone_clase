@@ -1,3 +1,10 @@
 ﻿@{
-    Layout = "_Layout";
+  Layout = "_Layout";
+
+  //  si declaramos una variable en este alcance es "local" por lo que tenemos
+  //  que usar un componente que exista general a todas las vistas!
+  //
+  ViewBag.ShowAlert = false;
+  ViewBag.Mensaje = "Desde _ViewStart!!";  
 }
+

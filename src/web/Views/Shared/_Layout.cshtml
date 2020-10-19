@@ -1,49 +1,205 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@ViewData["Title"] - web</title>
-  <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="~/css/site.css" />
+  <link href="@Url.Content("~/css/site.css")" asp-append-version="true" rel="stylesheet" type="text/css" />
+  <link href="@Url.Content("~/lib/bootstrap/dist/css/bootstrap.css")" asp-append-version="true" rel="stylesheet" />
+
+  @RenderSection("style_links", false)
+
+  <title>@ViewBag.Mensaje</title>
+
+  <script src="~/lib/popper.js/umd/popper.js"></script>
+  <script src="~/lib/jquery/jquery.js"></script>
+  <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+
+  @RenderSection("scripts_links", false)
+
+  <style>
+    html, body {
+      height: 100%;
+      /*min-height: 100vh;*/
+      /*min-height: 100vh;*/
+    }
+
+    .contenido {
+      flex: 1 0 auto;
+    }
+
+    footer {
+      flex-shrink: unset;
+    }
+
+    .bd-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1071;
+    }
+
+    .titulo {
+      font-size: 1.8em;
+    }
+
+    .bz-style {
+      background-color: #32679C;
+    }
+
+
+      .bz-style.errorXX {
+        background-color: #9c324f !important;
+      }
+
+    .bz-style1 {
+      background-color: #05284c;
+    }
+
+    footer div.bz-style1 {
+      background-color: #05284c;
+    }
+
+    .dropdown .dropdown-menu a:hover {
+      background-color: #32679C;
+      color: #fdfcfa;
+    }
+
+    .dropdown-menu a.dropdown-item:hover {
+      background: unset;
+      background-color: #66a2de;
+    }
+
+    .navegable {
+      cursor: pointer;
+    }
+
+    .force-pointer {
+      cursor: pointer;
+    }
+  </style>
+
+  @RenderSection("style_page", false)
+
+  <environment include="Development">
+    <style>
+      footer div.bz-style {
+        background-color: #9c324f;
+      }
+    </style>
+  </environment>
+
+  <script language="javascript" type="text/javascript">
+    $(document).ready(function () {
+      //window.alert("OMG!!!");
+    });
+  </script>
+
+  @RenderSection("script_page", false)
+
 </head>
 
-<body>
-  <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-      <div class="container">
-        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">web</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+<body class="d-flex flex-column">
+
+  <div class="contenido">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bz-style bd-navbar">
+      <div class="container-fluid pl-0 pr-0" style="align-content: center;">
+
+        <!--    BRAND CON LOGOTIPO    -->
+
+        <div class="navbar-brand" style="font-size: 1rem;">
+          <div class="d-flex">
+            <a class="ml-0 mr-0 p-0">
+              <svg width="50px" height="50px" version="1.1" viewBox="0 0 74.219 60.963"
+                   xmlns="http://www.w3.org/2000/svg" xmlns:osb="http://www.openswatchbook.org/uri/2009/osb">
+                <g transform="translate(-70.845 -33.101)">
+                  <g transform="translate(31.162 8.839)" aria-label="BZ">
+                    <path d="m57.484 36.932q5.5372 0 8.6868 2.286 3.2004 2.2352 3.2004 7.0104 0 2.8956-1.3208 5.0292t-3.7084 3.3528q-2.3368 1.2192-5.5372 1.3716l-0.7112-2.54q3.7084 0.1016 6.6548 1.3208t4.6736 3.4036 1.7272 5.1816q0 2.7432-1.016 4.7244-1.016 1.9304-2.7432 3.2004-1.7272 1.2192-3.9116 1.8288-2.1844 0.5588-4.5212 0.5588h-10.922v-36.728zm1.016 16.104q3.048 0 4.4196-1.6764 1.3716-1.7272 1.3716-4.1656 0-2.8956-1.778-4.2164t-4.7752-1.3208h-4.7752v11.379zm0.2032 16.053q2.032 0 3.7084-0.6096 1.7272-0.6096 2.6924-1.8796 1.016-1.27 1.016-3.2004 0-2.1336-1.1684-3.3528-1.1176-1.2192-2.8956-1.7272-1.778-0.5588-3.6576-0.5588h-5.4356v11.328z" />
+                    <path d="m76.101 73.661q0.5588-0.8128 1.6764-2.4892 1.1684-1.6764 2.6924-3.9624 1.524-2.286 3.2512-4.9276 1.778-2.6416 3.6068-5.3848 1.8796-2.7432 3.6068-5.334 1.778-2.6416 3.302-4.8768 1.524-2.286 2.6416-3.9116 1.1684-1.6764 1.7272-2.4384l0.6604 1.3208h-16.967q-0.9652 0-1.9304-0.3556t-1.5748-1.0668-0.6096-1.6764v-3.4544h4.572v0.6604q0 0.9144 0.3556 1.0668 0.3556 0.1016 1.2192 0.1016h21.996l-22.2 32.614-0.3048-0.6096h23.114v4.7244z" />
+                  </g>
+                  <path d="m132.69 33.898a11.436 9.3936 0 0 1 11.4 9.3637v40.642a11.436 9.3936 0 0 1-11.4 9.3637h-49.479a11.436 9.3936 0 0 1-11.4-9.3637v-40.642a11.436 9.3936 0 0 1 11.4-9.3637h49.479m0-0.7969h-49.479c-6.8034 0-12.37 4.5723-12.37 10.161v40.642c0 5.5883 5.5664 10.161 12.37 10.161h49.479c6.8034 0 12.37-4.5723 12.37-10.161v-40.642c0-5.5883-5.5664-10.161-12.37-10.161z"
+                        fill="currentColor" />
+                </g>
+              </svg>
+            </a>
+
+            <!--    TEXTO COMPLETO COLAPSA EN ANCHO REDUCIDO    -->
+
+            <div class="collapse navbar-collapse"
+                 style="flex: 0 1 auto; align-items: unset !important;">
+              <div class="text-light" style="display: flex; flex-direction: column;">
+                <div><span style="font-family: sans-serif; font-weight: 800; font-size: 1.2em;">Biblio</span></div>
+                <div style="margin-top: -8px;">
+                  <span style="font-family: sans-serif; font-weight: 800; font-size: 1.2em;">Zone</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!--    HAMBURGUESA SOLO PARA ANCHOS REDUCIDOS    -->
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContenido">
+          <span class="navbar-toggler-icon text-light"></span>
         </button>
-        <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-          <ul class="navbar-nav flex-grow-1">
-            <li class="nav-item">
-              <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+        <!--    AREA COLAPSABLE EN ANCHO REDUCIDO PERO VISIBLE EN HAMBURGUESA    -->
+
+        <div class="collapse navbar-collapse justify-content-between" id="navbarContenido">
+
+          <ul class="navbar-nav">
+
+            <!--  Menu Herramientas  -->
+
+            <li class="nav-item dropdown">
+              <a class="nav-link text-light dropdown-toggle active" data-toggle="dropdown"
+                 href="#">Herramientas<span class="sr-only">(current)</span></a>
+
+              <div class="dropdown-menu">
+                <h2 class="d-none dropdown-header" style="font-size: 1.03em; font-weight: bold;">
+                  Opciones
+                </h2>
+                <a class="dropdown-item" href="#" target="_blank">
+                  Opcion
+                </a>
+              </div>
             </li>
           </ul>
         </div>
+
       </div>
     </nav>
-  </header>
-  <div class="container">
-    <main role="main" class="pb-3">
+
+    <div class="container-fluid">
+
       @RenderBody()
-    </main>
+
+    </div>
+
   </div>
 
-  <footer class="border-top footer text-muted">
-    <div class="container">
-      &copy; 2020 - web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+  <!--    FOOTER    -->
+
+  <footer class="mt-4">
+    <div class="container-fluid bz-style">
+      <div class="row p-3">
+        <div class="col-5 text-white-50">
+          <span class="d-block">Nombre de la empresa</span>
+          <span class="d-block">Otros datos</span>
+        </div>
+        <div class="col-5 text-white-50">
+
+        </div>
+        <div class="col-2">
+
+          <span>
+            Contacto mail y Quiénes Somos?
+          </span>
+        </div>
+      </div>
     </div>
   </footer>
-  <script src="~/lib/jquery/dist/jquery.min.js"></script>
-  <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="~/js/site.js" asp-append-version="true"></script>
-  @RenderSection("Scripts", required: false)
+
+  @RenderSection("widgets", false)
+
 </body>
 </html>
